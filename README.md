@@ -1,94 +1,97 @@
-# 📋 Commit Lint Action
+# Commit Lint Action
 
-> Enforce [Conventional Commits](https://www.conventionalcommits.org/) format on every PR and push.
+🔨 GitHub Action to enforce [Conventional Commits](https://www.conventionalcommits.org/) format on your pull requests.
 
-[![CI](https://github.com/ollieb89/commit-lint-action/actions/workflows/ci.yml/badge.svg)](https://github.com/ollieb89/commit-lint-action/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Validates every commit message in a PR against the conventional commits specification. Fails the check if any commits don't follow the format, with clear inline feedback.
 
 ## Features
 
-- ✅ Validates commit messages against conventional format
-- 🔒 Configurable allowed types and scopes
-- 💬 Posts PR comments with per-commit results
-- 📊 GitHub Actions summary with full breakdown
-- ⚙️ Deduplicates PR comments (updates instead of spamming)
-- 🚦 Configurable fail / warn mode
+- ✅ Validates commit messages against Conventional Commits format
+- ✅ Configurable commit types and scopes
+- ✅ Supports merge commits and revert commits
+- ✅ Clear error messages with format examples
+- ✅ Zero dependencies
+- ✅ Fast execution
 
 ## Usage
 
-```yaml
-name: Commit Lint
+### Basic
 
-on:
-  pull_request:
-  push:
-    branches: [main]
+```yaml
+name: CI
+on: [pull_request]
 
 jobs:
-  lint:
+  commit-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: ollieb89/commit-lint-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### With custom types
+
+```yaml
+- uses: ollieb89/commit-lint-action@v1
+  with:
+    types: feat,fix,docs,chore,ci
+```
+
+### With scope validation
+
+```yaml
+- uses: ollieb89/commit-lint-action@v1
+  with:
+    types: feat,fix
+    scopes: api,ui,db
 ```
 
 ## Inputs
 
-| Input | Description | Default |
-|-------|-------------|---------|
-| `token` | GitHub token | `${{ github.token }}` |
-| `fail-on-error` | Fail workflow on invalid commits | `true` |
-| `post-comment` | Post PR comment with results | `true` |
-| `types` | Allowed commit types (comma-separated) | `feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert` |
-| `scopes` | Allowed scopes — empty = any | `""` |
-| `min-length` | Minimum message length | `10` |
-| `max-length` | Maximum message length | `100` |
+| Input | Description | Default | Required |
+|-------|-------------|---------|----------|
+| `token` | GitHub token (defaults to `GITHUB_TOKEN`) | `""` | No |
+| `types` | Comma-separated list of allowed commit types | `feat,fix,docs,style,refactor,perf,test,chore` | No |
+| `scopes` | Comma-separated list of allowed scopes (empty = any) | `""` | No |
+| `allow-merge-commits` | Allow merge commit messages | `false` | No |
+| `allow-revert` | Allow revert commit messages | `true` | No |
 
-## Outputs
-
-| Output | Description |
-|--------|-------------|
-| `valid` | `true` if all commits are valid |
-| `invalid-count` | Number of invalid commits |
-| `total-count` | Total commits checked |
-
-## Conventional Commit Format
+## Conventional Commits Format
 
 ```
-type(scope): description
+<type>(<scope>): <subject>
 
-feat(auth): add OAuth2 login
-fix: handle null pointer in parser
-docs(readme): update installation steps
-chore!: drop Node 14 support
+<body>
+
+<footer>
 ```
 
-### Allowed Types (default)
+### Rules
 
-| Type | Purpose |
-|------|---------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation |
-| `style` | Formatting, no logic change |
-| `refactor` | Code restructure |
-| `perf` | Performance improvement |
-| `test` | Adding/fixing tests |
-| `build` | Build system changes |
-| `ci` | CI configuration |
-| `chore` | Maintenance tasks |
-| `revert` | Revert a commit |
+- **type** — lowercase, required, one of: feat, fix, docs, style, refactor, perf, test, chore
+- **scope** — optional, alphanumeric with hyphens
+- **subject** — lowercase, imperative mood, no period, < 50 characters
+- **body** — optional, explains what and why
+- **footer** — optional, references issues
+
+### Examples
+
+✅ Valid:
+```
+feat: add user authentication
+fix(api): resolve null pointer exception
+docs: update readme
+chore: update dependencies
+```
+
+❌ Invalid:
+```
+Add user authentication          # Missing type
+feat: Add user authentication    # Uppercase subject
+feat(Invalid): something         # Unknown scope
+feat: add feature with a very long subject that exceeds fifty characters
+```
 
 ## License
 
-MIT © [ollieb89](https://github.com/ollieb89)
-
----
-
-## 🔐 Level Up Your Security
-
-Using GitHub Actions? Grab the **[GitHub Actions Security Checklist](https://trivexia.gumroad.com/l/bfsbud)** — 50+ battle-tested checks covering secrets management, supply chain attacks, permission scoping, and runner hardening.
+MIT © 2026 Ollie B

@@ -13,5 +13,20 @@
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.1"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ollieb89/commit-lint-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ollieb89/commit-lint-action/issues"
+  },
+  "homepage": "https://github.com/ollieb89/commit-lint-action#readme"
 }

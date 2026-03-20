@@ -1,49 +1,31 @@
-name: 'Commit Lint Action'
-description: 'Enforce conventional commit format on pull requests and pushes'
-author: 'ollieb89'
-
+name: Commit Lint
+description: Validate commit messages against Conventional Commits format
 branding:
-  icon: 'check-circle'
-  color: 'green'
+  icon: check-circle
+  color: green
 
 inputs:
   token:
-    description: 'GitHub token for PR comments'
+    description: GitHub token (defaults to GITHUB_TOKEN)
     required: false
-    default: ${{ github.token }}
-  fail-on-error:
-    description: 'Fail the workflow if commits do not follow conventional format'
-    required: false
-    default: 'true'
-  post-comment:
-    description: 'Post a PR comment with results'
-    required: false
-    default: 'true'
+    default: ""
   types:
-    description: 'Comma-separated list of allowed commit types'
+    description: Comma-separated list of allowed commit types
     required: false
-    default: 'feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert'
+    default: feat,fix,docs,style,refactor,perf,test,chore
   scopes:
-    description: 'Comma-separated list of allowed scopes (empty = any scope allowed)'
+    description: Optional comma-separated list of allowed scopes (empty = any)
     required: false
-    default: ''
-  min-length:
-    description: 'Minimum commit message length'
+    default: ""
+  allow-merge-commits:
+    description: Allow merge commit messages
     required: false
-    default: '10'
-  max-length:
-    description: 'Maximum commit message length'
+    default: "false"
+  allow-revert:
+    description: Allow revert commit messages
     required: false
-    default: '100'
-
-outputs:
-  valid:
-    description: 'Whether all commits are valid (true/false)'
-  invalid-count:
-    description: 'Number of invalid commits'
-  total-count:
-    description: 'Total number of commits checked'
+    default: "true"
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: node22
+  main: dist/index.js

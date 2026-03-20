@@ -1,0 +1,24 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run build
+      - name: Verify dist/index.js is bundled
+        run: |
+          if [ ! -f dist/index.js ]; then
+            echo "dist/index.js not found"
+            exit 1
+          fi
+          if [ $(wc -l < dist/index.js) -lt 100 ]; then
+            echo "dist/index.js seems too small (not bundled?)"
+            exit 1
+          fi
