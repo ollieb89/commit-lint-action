@@ -1,0 +1,49 @@
+name: 'Commit Lint Action'
+description: 'Enforce conventional commit format on pull requests and pushes'
+author: 'ollieb89'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+  fail-on-error:
+    description: 'Fail the workflow if commits do not follow conventional format'
+    required: false
+    default: 'true'
+  post-comment:
+    description: 'Post a PR comment with results'
+    required: false
+    default: 'true'
+  types:
+    description: 'Comma-separated list of allowed commit types'
+    required: false
+    default: 'feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert'
+  scopes:
+    description: 'Comma-separated list of allowed scopes (empty = any scope allowed)'
+    required: false
+    default: ''
+  min-length:
+    description: 'Minimum commit message length'
+    required: false
+    default: '10'
+  max-length:
+    description: 'Maximum commit message length'
+    required: false
+    default: '100'
+
+outputs:
+  valid:
+    description: 'Whether all commits are valid (true/false)'
+  invalid-count:
+    description: 'Number of invalid commits'
+  total-count:
+    description: 'Total number of commits checked'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

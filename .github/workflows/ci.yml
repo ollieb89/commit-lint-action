@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run build
+      - name: Verify dist exists
+        run: test -f dist/index.js && echo "✅ dist/index.js exists"
+
+  lint-self:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint commits (self-test)
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-error: 'false'
+          post-comment: 'false'
+
+  workflow-guardian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ollieb89/workflow-guardian@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
