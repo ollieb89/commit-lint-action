@@ -1,97 +1,145 @@
-# Commit Lint Action
+# commit-lint-action
 
-🔨 GitHub Action to enforce [Conventional Commits](https://www.conventionalcommits.org/) format on your pull requests.
+A GitHub Action that enforces [Conventional Commits](https://www.conventionalcommits.org/) format on your commit messages and fails CI clearly when commits are invalid.
 
-Validates every commit message in a PR against the conventional commits specification. Fails the check if any commits don't follow the format, with clear inline feedback.
+## Why
 
-## Features
+Bad commit messages create noise. When every team member writes messages differently, git history becomes useless for changelogs, release notes, and debugging. This action enforces a consistent format automatically.
 
-- ✅ Validates commit messages against Conventional Commits format
-- ✅ Configurable commit types and scopes
-- ✅ Supports merge commits and revert commits
-- ✅ Clear error messages with format examples
-- ✅ Zero dependencies
-- ✅ Fast execution
-
-## Usage
-
-### Basic
+## Quick Start
 
 ```yaml
-name: CI
+name: Commit Lint
 on: [pull_request]
 
 jobs:
-  commit-lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ollieb89/commit-lint-action@v1
 ```
 
-### With custom types
-
-```yaml
-- uses: ollieb89/commit-lint-action@v1
-  with:
-    types: feat,fix,docs,chore,ci
-```
-
-### With scope validation
-
-```yaml
-- uses: ollieb89/commit-lint-action@v1
-  with:
-    types: feat,fix
-    scopes: api,ui,db
-```
+That's it. Every PR commit will be validated against Conventional Commits format.
 
 ## Inputs
 
-| Input | Description | Default | Required |
-|-------|-------------|---------|----------|
-| `token` | GitHub token (defaults to `GITHUB_TOKEN`) | `""` | No |
-| `types` | Comma-separated list of allowed commit types | `feat,fix,docs,style,refactor,perf,test,chore` | No |
-| `scopes` | Comma-separated list of allowed scopes (empty = any) | `""` | No |
-| `allow-merge-commits` | Allow merge commit messages | `false` | No |
-| `allow-revert` | Allow revert commit messages | `true` | No |
+| Input | Default | Description |
+|-------|---------|-------------|
+| `mode` | `pr` | Validation mode: `pr`, `push`, `sha`, or `range` |
+| `types` | `feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert` | Comma-separated allowed types |
+| `requireScope` | `false` | Require a scope in commit messages |
+| `allowBreaking` | `true` | Allow `!` breaking change marker |
+| `minSubjectLength` | `3` | Minimum subject length |
+| `maxSubjectLength` | `72` | Maximum subject length |
+| `githubToken` | `${{ github.token }}` | GitHub token for API access |
+| `sha` | | Specific commit SHA (for `sha` mode) |
+| `range` | | Git range (for `range` mode, e.g. `HEAD~3..HEAD`) |
 
-## Conventional Commits Format
+## Examples
 
+### PR Mode (default)
+
+```yaml
+- uses: ollieb89/commit-lint-action@v1
 ```
-<type>(<scope>): <subject>
 
-<body>
+### Push Mode
 
-<footer>
+```yaml
+name: Commit Lint
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ollieb89/commit-lint-action@v1
+        with:
+          mode: push
 ```
 
-### Rules
+### Custom Types
 
-- **type** — lowercase, required, one of: feat, fix, docs, style, refactor, perf, test, chore
-- **scope** — optional, alphanumeric with hyphens
-- **subject** — lowercase, imperative mood, no period, < 50 characters
-- **body** — optional, explains what and why
-- **footer** — optional, references issues
+```yaml
+- uses: ollieb89/commit-lint-action@v1
+  with:
+    types: feat,fix,hotfix,release
+```
 
-### Examples
+### Require Scope
 
-✅ Valid:
+```yaml
+- uses: ollieb89/commit-lint-action@v1
+  with:
+    requireScope: 'true'
+```
+
+### Range Mode
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+- uses: ollieb89/commit-lint-action@v1
+  with:
+    mode: range
+    range: HEAD~5..HEAD
+```
+
+## Supported Formats
+
+### Valid
+
 ```
 feat: add user authentication
 fix(api): resolve null pointer exception
-docs: update readme
-chore: update dependencies
+docs: update installation guide
+feat!: remove deprecated endpoint
+fix(auth)!: change token format
+chore(deps): bump lodash to 4.17.21
 ```
 
-❌ Invalid:
+### Invalid
+
 ```
-Add user authentication          # Missing type
-feat: Add user authentication    # Uppercase subject
-feat(Invalid): something         # Unknown scope
-feat: add feature with a very long subject that exceeds fifty characters
+fixed the login bug          → no type:subject format
+FEAT: add login              → type must be lowercase
+feat:                        → empty subject
+feat(): add thing            → empty scope
+yolo: ship it                → unknown type
 ```
+
+## Error Output
+
+When commits fail validation, you get clear output:
+
+```
+❌ 2 of 5 commit(s) failed validation:
+
+  a1b2c3d — fixed stuff
+    ⚠ Does not match conventional commit format: type[(scope)][!]: subject
+
+  d4e5f6g — FEAT: Add Feature
+    ⚠ Type must be lowercase (got "FEAT")
+
+Valid examples:
+  feat: add user authentication
+  fix(api): resolve null pointer
+  docs: update installation guide
+```
+
+## Limitations
+
+- Validates first line of commit message only (body/footer not checked)
+- No PR comment posting (CI output only)
+- No auto-fix or commit rewriting
+- PR mode requires `pull_request` event; push mode requires `push` event
+- Range/SHA modes require `fetch-depth: 0` in checkout
 
 ## License
 
-MIT © 2026 Ollie B
+MIT — see [LICENSE](LICENSE)

@@ -1,31 +1,48 @@
-name: Commit Lint
-description: Validate commit messages against Conventional Commits format
+name: 'Commit Lint Action'
+description: 'Enforce Conventional Commit message format on PRs, pushes, and custom ranges'
+author: 'Trivexi AI'
 branding:
   icon: check-circle
   color: green
 
 inputs:
-  token:
-    description: GitHub token (defaults to GITHUB_TOKEN)
+  mode:
+    description: 'Validation mode: pr, push, sha, or range'
     required: false
-    default: ""
+    default: 'pr'
   types:
-    description: Comma-separated list of allowed commit types
+    description: 'Comma-separated list of allowed commit types'
     required: false
-    default: feat,fix,docs,style,refactor,perf,test,chore
-  scopes:
-    description: Optional comma-separated list of allowed scopes (empty = any)
+    default: 'feat,fix,docs,style,refactor,perf,test,build,ci,chore,revert'
+  requireScope:
+    description: 'Require a scope in the commit message'
     required: false
-    default: ""
-  allow-merge-commits:
-    description: Allow merge commit messages
+    default: 'false'
+  allowBreaking:
+    description: 'Allow breaking change marker (!)'
     required: false
-    default: "false"
-  allow-revert:
-    description: Allow revert commit messages
+    default: 'true'
+  minSubjectLength:
+    description: 'Minimum subject length'
     required: false
-    default: "true"
+    default: '3'
+  maxSubjectLength:
+    description: 'Maximum subject length'
+    required: false
+    default: '72'
+  githubToken:
+    description: 'GitHub token for API access (PR mode)'
+    required: false
+    default: ${{ github.token }}
+  sha:
+    description: 'Specific commit SHA to validate (sha mode)'
+    required: false
+    default: ''
+  range:
+    description: 'Git range to validate (range mode, e.g. HEAD~3..HEAD)'
+    required: false
+    default: ''
 
 runs:
-  using: node22
-  main: dist/index.js
+  using: 'node20'
+  main: 'src/index.js'
